@@ -7,10 +7,16 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -37,39 +43,70 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ArtSpaceScreen(modifier: Modifier = Modifier) {
-	val firstArtwork = R.drawable.anne
-	val secondArtwork = R.drawable.daryl
-	val thirdArtwork = R.drawable.eleven
-	val fourthArtwork = R.drawable.gloria
-	val fifthArtwork = R.drawable.sheldon
-	val sixthArtwork = R.drawable.serena
-	val seventhArtwork = R.drawable.tokyo
-	val eighthArtwork = R.drawable.monica
-	val ninthArtwork = R.drawable.pablo
-	val tenthArtwork = R.drawable.jughead
+	val artworks = listOf(
+		R.drawable.anne ,
+		R.drawable.daryl,
+		R.drawable.eleven,
+		R.drawable.gloria,
+		R.drawable.sheldon,
+		R.drawable.serena, R.drawable.tokyo, R.drawable.monica, R.drawable.pablo, R.drawable.jughead
+	)
 
-	var title by remember {
-		mutableStateOf(R.string.Anne)
+	val titles = listOf(
+		R.string.Anne,
+		R.string.Daryl,
+		R.string.Eleven,
+		R.string.Gloria,
+		R.string.Sheldon,
+		R.string.Serena, R.string.Tokyo, R.string.Monica, R.string.Pablo, R.string.Jughead
+	)
+
+	val description = listOf(
+		R.string.Anne_text,
+		R.string.Daryl_text,
+		R.string.Eleven_text,
+		R.string.Gloria_text,
+		R.string.Sheldon_text,
+		R.string.Serena_text, R.string.Tokyo_text, R.string.Monica_text, R.string.Pablo_text, R.string.Jughead_text
+	)
+
+	var currentIndex by remember { mutableStateOf(0) }
+	var currentArtwork by remember { mutableStateOf(artworks[0]) }
+	var title by remember { mutableStateOf(titles[0]) }
+	var texto_serie by remember { mutableStateOf(description[0]) }
+
+	fun changeArtwork(index: Int) {
+		currentArtwork = artworks[index]
+		title = titles[index]
+		texto_serie = description[index]
 	}
 
-	var texto_serie by remember {
-		mutableStateOf(R.string.Anne_text)
+	var restartButtonPressed by remember { mutableStateOf(false) }
+
+	DisposableEffect(restartButtonPressed) {
+		if (restartButtonPressed) {
+			restartButtonPressed = false
+		}
+		onDispose { }
 	}
 
-	var currentArtwork by remember {
-		mutableStateOf(firstArtwork)
+	fun onButtonClick(isNext: Boolean) {
+		val newIndex = if (isNext) (currentIndex + 1) % artworks.size else (currentIndex - 1 + artworks.size) % artworks.size
+		currentIndex = newIndex
+		changeArtwork(newIndex)
 	}
-
-	var imageResource by remember {
-		mutableStateOf(currentArtwork)
-	}
-
 
 	Column(
-		modifier = modifier
-			.fillMaxWidth(),
+		modifier = modifier.fillMaxWidth(),
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {
+		Spacer(modifier = modifier.size(16.dp))
+		Text(text = "Mayra Alejandra Sanchez Salinas", fontSize = 20.sp)
+		Spacer(modifier = modifier.size(16.dp))
+		Text(text = "- 202040506 -", fontSize = 20.sp)
+		Spacer(modifier = modifier.size(16.dp))
+		Text(text = "My favorite characters", fontSize = 20.sp)
+		Spacer(modifier = modifier.size(16.dp))
 		ArtworkDisplay(currentArtwork = currentArtwork)
 		Spacer(modifier = modifier.size(16.dp))
 		ArtworkTitle(title = title, texto_serie = texto_serie)
@@ -78,151 +115,70 @@ fun ArtSpaceScreen(modifier: Modifier = Modifier) {
 			modifier = modifier.padding(horizontal = 8.dp),
 			horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
 		) {
-			// Previous Button
-			Button(
-				onClick = {
-					when (currentArtwork) {
-						firstArtwork -> {
-							currentArtwork = tenthArtwork
-							title = R.string.Jughead
-							texto_serie = R.string.Jughead_text
-						}
-						secondArtwork -> {
-							currentArtwork = firstArtwork
-							title = R.string.Anne
-							texto_serie = R.string.Anne_text
-						}
-						thirdArtwork -> {
-							currentArtwork = secondArtwork
-							title = R.string.Daryl
-							texto_serie = R.string.Daryl_text
-						}
-						fourthArtwork -> {
-							currentArtwork = thirdArtwork
-							title = R.string.Eleven
-							texto_serie = R.string.Eleven_text
-						}
-						fifthArtwork -> {
-							currentArtwork = fourthArtwork
-							title = R.string.Gloria
-							texto_serie = R.string.Gloria_text
-						}
-						sixthArtwork -> {
-							currentArtwork = fifthArtwork
-							title = R.string.Sheldon
-							texto_serie = R.string.Sheldon_text
-						}
-						seventhArtwork -> {
-							currentArtwork = sixthArtwork
-							title = R.string.Serena
-							texto_serie = R.string.Serena_text
-						}
-						eighthArtwork -> {
-							currentArtwork = seventhArtwork
-							title = R.string.Tokyo
-							texto_serie = R.string.Tokyo_text
-						}
-						ninthArtwork -> {
-							currentArtwork = eighthArtwork
-							title = R.string.Monica
-							texto_serie = R.string.Monica_text
-						}
-						else -> {
-							currentArtwork = ninthArtwork
-							title = R.string.Pablo
-							texto_serie = R.string.Pablo_text
-						}
-					}
-				},
-				colors = ButtonDefaults.buttonColors(
-					backgroundColor = colorResource(id = R.color.gray_900)
-				),
-				elevation = ButtonDefaults.elevation(
-					defaultElevation = 1.dp,
-					pressedElevation = 0.dp,
-					focusedElevation = 0.dp
-				)
+			Column(
+				horizontalAlignment = Alignment.CenterHorizontally,
+				verticalArrangement = Arrangement.spacedBy(8.dp)
 			) {
-				Text(
-					text = "Previous character",
-					fontSize = 16.sp,
-					fontWeight = FontWeight.Medium,
-					color = colorResource(id = R.color.blue_300)
-				)
+				Button(
+					onClick = {
+						currentIndex = (currentIndex - 1 + artworks.size) % artworks.size
+						changeArtwork(currentIndex)
+					},
+					colors = ButtonDefaults.buttonColors(
+						backgroundColor = colorResource(id = R.color.gray_900)
+					),
+					elevation = ButtonDefaults.elevation(
+						defaultElevation = 1.dp,
+						pressedElevation = 0.dp,
+						focusedElevation = 0.dp
+					)
+				) {
+					Text(
+						text = "Previous character",
+						fontSize = 16.sp,
+						fontWeight = FontWeight.Medium,
+						color = colorResource(id = R.color.blue_300)
+					)
+				}
+
+				Button(
+					onClick = {
+						currentIndex = (currentIndex + 1) % artworks.size
+						changeArtwork(currentIndex)
+					},
+					colors = ButtonDefaults.buttonColors(
+						backgroundColor = colorResource(id = R.color.gray_900)
+					),
+					elevation = ButtonDefaults.elevation(
+						defaultElevation = 1.dp,
+						pressedElevation = 0.dp,
+						focusedElevation = 0.dp
+					)
+				) {
+					Text(
+						text = "Next character",
+						fontSize = 16.sp,
+						fontWeight = FontWeight.Medium,
+						color = colorResource(id = R.color.blue_300)
+					)
+				}
 			}
 
-			// Next Button
-			Button(
+			IconButton(
 				onClick = {
-					when (currentArtwork) {
-						firstArtwork -> {
-							currentArtwork = tenthArtwork
-							title = R.string.Jughead
-							texto_serie = R.string.Jughead_text
-						}
-						secondArtwork -> {
-							currentArtwork = firstArtwork
-							title = R.string.Anne
-							texto_serie = R.string.Anne_text
-						}
-						thirdArtwork -> {
-							currentArtwork = secondArtwork
-							title = R.string.Daryl
-							texto_serie = R.string.Daryl_text
-						}
-						fourthArtwork -> {
-							currentArtwork = thirdArtwork
-							title = R.string.Eleven
-							texto_serie = R.string.Eleven_text
-						}
-						fifthArtwork -> {
-							currentArtwork = fourthArtwork
-							title = R.string.Gloria
-							texto_serie = R.string.Gloria_text
-						}
-						sixthArtwork -> {
-							currentArtwork = fifthArtwork
-							title = R.string.Sheldon
-							texto_serie = R.string.Sheldon_text
-						}
-						seventhArtwork -> {
-							currentArtwork = sixthArtwork
-							title = R.string.Serena
-							texto_serie = R.string.Serena_text
-						}
-						eighthArtwork -> {
-							currentArtwork = seventhArtwork
-							title = R.string.Tokyo
-							texto_serie = R.string.Tokyo_text
-						}
-						ninthArtwork -> {
-							currentArtwork = eighthArtwork
-							title = R.string.Monica
-							texto_serie = R.string.Monica_text
-						}
-						else -> {
-							currentArtwork = ninthArtwork
-							title = R.string.Pablo
-							texto_serie = R.string.Pablo_text
-						}
-					}
+					restartButtonPressed = true
+					currentIndex = 0 // Reinicia el índice de la galería
+					changeArtwork(0) // Cambia el arte a la primera imagen
 				},
-				colors = ButtonDefaults.buttonColors(
-					backgroundColor = colorResource(id = R.color.gray_900)
-				),
-				elevation = ButtonDefaults.elevation(
-					defaultElevation = 1.dp,
-					pressedElevation = 0.dp,
-					focusedElevation = 0.dp
-				)
-			) {
-				Text(
-					text = "Next character",
-					fontSize = 16.sp,
-					fontWeight = FontWeight.Medium,
-					color = colorResource(id = R.color.blue_300)
-				)
-			}
+				modifier = Modifier.size(48.dp),
+				content = {
+					Icon(
+						imageVector = Icons.Default.Refresh,
+						contentDescription = null,
+						tint = Color.White
+					)
+				}
+			)
 		}
 	}
 }
@@ -232,12 +188,21 @@ fun ArtworkDisplay(
 	modifier: Modifier = Modifier,
 	@DrawableRes currentArtwork: Int
 ) {
-	Image(
-		painter = painterResource(currentArtwork),
-		contentDescription = stringResource(id = R.string.Daryl),
-		modifier = modifier.fillMaxWidth(),
-		contentScale = ContentScale.FillWidth
-	)
+	Box(
+		modifier = modifier
+			.fillMaxWidth()
+			.aspectRatio(1f),
+		contentAlignment = Alignment.Center
+	) {
+		Image(
+			painter = painterResource(currentArtwork),
+			contentDescription = stringResource(id = R.string.Daryl),
+			contentScale = ContentScale.Crop,
+			modifier = Modifier
+				.fillMaxSize()
+				.clip(shape = RoundedCornerShape(15.dp))
+		)
+	}
 }
 
 @Composable
@@ -255,7 +220,7 @@ fun ArtworkTitle(
 			color = colorResource(id = R.color.white),
 			fontSize = 32.sp
 		)
-		
+
 		// Artwork year
 		Text(
 			text = "— ${stringResource(id = texto_serie)} —",
